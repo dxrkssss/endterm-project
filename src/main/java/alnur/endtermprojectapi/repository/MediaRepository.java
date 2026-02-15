@@ -42,7 +42,7 @@ public class MediaRepository {
 
     public List<Media> getAll() {
         List<Media> list = new ArrayList<>();
-        String sql = "SELECT * FROM media";
+        String sql = "SELECT * FROM media WHERE is_deleted = 0";
 
         try (Connection c = db.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
@@ -59,7 +59,7 @@ public class MediaRepository {
     }
 
     public Optional<Media> getById(int id) {
-        String sql = "SELECT * FROM media WHERE id = ?";
+        String sql = "SELECT * FROM media WHERE id = ? AND is_deleted = 0";
 
         try (Connection c = db.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -76,7 +76,7 @@ public class MediaRepository {
     }
 
     public Media update(int id, Media media) {
-        String sql = "UPDATE media SET name = ?, type = ?, duration = ? WHERE id = ?";
+        String sql = "UPDATE media SET name = ?, type = ?, duration = ? WHERE id = ? AND is_deleted = 0";
 
         try (Connection c = db.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -87,7 +87,7 @@ public class MediaRepository {
             ps.setInt(4, id);
 
             int updated = ps.executeUpdate();
-            if (updated == 0) throw new ResourceNotFoundException("Media not found: " + id);
+            if (updated == 0) throw new ResourceNotFoundException("Media not found");
 
             media.setId(id);
             return media;
@@ -98,7 +98,7 @@ public class MediaRepository {
     }
 
     public void delete(int id) {
-        String sql = "DELETE FROM media WHERE id = ?";
+        String sql = "UPDATE media SET is_deleted = 1 WHERE id = ?";
 
         try (Connection c = db.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
